@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Casino Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #222;
+            color: white;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #f4a261;
+            color: white;
+            border-radius: 5px;
+        }
+        .game-section {
+            display: none;
+            margin-top: 20px;
+        }
+        .slot-machine {
+            font-size: 40px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Online Casino</h1>
+    <p>Balance: $<span id="balance">1000</span></p>
+
+    <div class="container">
+        <button onclick="showGame('slots')">🎰 Slot Machine</button>
+        <button onclick="showGame('blackjack')">🃏 Blackjack</button>
+        <button onclick="showGame('roulette')">🎲 Roulette</button>
+    </div>
+
+    <!-- Slot Machine -->
+    <div id="slots" class="game-section">
+        <h2>🎰 Slot Machine</h2>
+        <div class="slot-machine">
+            <span id="slot1">❓</span>
+            <span id="slot2">❓</span>
+            <span id="slot3">❓</span>
+        </div>
+        <button onclick="playSlots()">Spin ($50)</button>
+        <p id="slot-result"></p>
+    </div>
+
+    <!-- Blackjack -->
+    <div id="blackjack" class="game-section">
+        <h2>🃏 Blackjack</h2>
+        <p>Your Hand: <span id="player-hand"></span> (Total: <span id="player-total">0</span>)</p>
+        <button onclick="hit()">Hit</button>
+        <button onclick="stand()">Stand</button>
+        <p id="blackjack-result"></p>
+    </div>
+
+    <!-- Roulette -->
+    <div id="roulette" class="game-section">
+        <h2>🎲 Roulette</h2>
+        <p>Choose a number (0-36):</p>
+        <input type="number" id="roulette-bet" min="0" max="36">
+        <button onclick="playRoulette()">Spin ($100)</button>
+        <p id="roulette-result"></p>
+    </div>
+
+    <script>
+        let balance = 1000;
+
+        function updateBalance(amount) {
+            balance += amount;
+            document.getElementById("balance").innerText = balance;
+        }
+
+        function showGame(game) {
+            document.querySelectorAll(".game-section").forEach(section => section.style.display = "none");
+            document.getElementById(game).style.display = "block";
+        }
+
+        // 🎰 Slot Machine Logic
+        function playSlots() {
+            if (balance < 50) return alert("Not enough balance!");
+            updateBalance(-50);
+
+            const symbols = ["🍒", "🍋", "🔔", "⭐", "7️⃣"];
+            let slot1 = symbols[Math.floor(Math.random() * symbols.length)];
+            let slot2 = symbols[Math.floor(Math.random() * symbols.length)];
+            let slot3 = symbols[Math.floor(Math.random() * symbols.length)];
+
+            document.getElementById("slot1").innerText = slot1;
+            document.getElementById("slot2").innerText = slot2;
+            document.getElementById("slot3").innerText = slot3;
+
+            if (slot1 === slot2 && slot2 === slot3) {
+                updateBalance(300);
+                document.getElementById("slot-result").innerText = "🎉 Jackpot! You win $300!";
+            } else {
+                document.getElementById("slot-result").innerText = "Try again!";
+            }
+        }
+
+        // 🃏 Blackjack Logic
+        let playerHand = [];
+        function getRandomCard() {
+            return Math.floor(Math.random() * 10) + 1;
+        }
+        function calculateTotal(hand) {
+            return hand.reduce((a, b) => a + b, 0);
+        }
+        function hit() {
+            playerHand.push(getRandomCard());
+            let total = calculateTotal(playerHand);
+            document.getElementById("player-hand").innerText = playerHand.join(", ");
+            document.getElementById("player-total").innerText = total;
+
+            if (total > 21) {
+                document.getElementById("blackjack-result").innerText = "💀 Bust! You lose!";
+                updateBalance(-100);
+                resetBlackjack();
+            }
+        }
+        function stand() {
+            let playerTotal = calculateTotal(playerHand);
+            let dealerTotal = Math.floor(Math.random() * 8) + 17; 
+
+            if (playerTotal > dealerTotal || dealerTotal > 21) {
+                document.getElementById("blackjack-result").innerText = "🎉 You win $200!";
+                updateBalance(200);
+            } else {
+                document.getElementById("blackjack-result").innerText = "😞 Dealer wins!";
+                updateBalance(-100);
+            }
+            resetBlackjack();
+        }
+        function resetBlackjack() {
+            playerHand = [];
+            document.getElementById("player-hand").innerText = "";
+            document.getElementById("player-total").innerText = "0";
+        }
+
+        // 🎲 Roulette Logic
+        function playRoulette() {
+            if (balance < 100) return alert("Not enough balance!");
+            let userBet = document.getElementById("roulette-bet").value;
+            if (userBet === "") return alert("Enter a number!");
+            updateBalance(-100);
+
+            let winningNumber = Math.floor(Math.random() * 37);
+            document.getElementById("roulette-result").innerText = `🎡 Winning number: ${winningNumber}`;
+
+            if (parseInt(userBet) === winningNumber) {
+                updateBalance(3600);
+                document.getElementById("roulette-result").innerText += " 🎉 You win $3600!";
+            } else {
+                document.getElementById("roulette-result").innerText += " 😞 You lose!";
+            }
+        }
+    </script>
+</body>
+</html>
